@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102c27">
+  <meta name="description" content="گردشگری ایران؛ اطلس تعاملی جاذبه‌های طبیعی، تاریخی، فرهنگی و کمترشناخته‌شده ایران.">
+  <title>گردشگری ایران | اطلس هوشمند جاذبه‌های ایران</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.css">
+  <script src="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ========== آیکون‌های SVG ========== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16 16 5 5"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"/><path d="M9 3v15M15 6v15"/></symbol>
+  <symbol id="i-mountain" viewBox="0 0 24 24"><path d="m2 20 7-14 4 8 3-5 6 11H2Z"/><path d="m7 10 2 2 2-1M14 12l2 2 2-1"/></symbol>
+  <symbol id="i-landmark" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6H3ZM5 10v8m4-8v8m6-8v8m4-8v8M3 21h18M2 18h20"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20.5 3.5C10 3 4 7.5 4 14a6.5 6.5 0 0 0 6.5 6.5c6.5 0 10.5-7 10-17Z"/><path d="M3 22c3-7 7-10 13-13"/></symbol>
+  <symbol id="i-utensils" viewBox="0 0 24 24"><path d="M7 3v6m-4-6v4a4 4 0 0 0 8 0V3M7 11v10M17 3v18m0-18c4 3 4 8 0 10"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M9 18h4a3 3 0 0 0 3-3V9"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18l-6-4-6 4V4Z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10m-7 5h4"/><circle cx="8" cy="7" r="2"/><circle cx="15" cy="12" r="2"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 5-10 5L2 8l10-5Z"/><path d="m2 12 10 5 10-5M2 16l10 5 10-5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22V4.5Z"/><path d="M4 18a2.5 2.5 0 0 1 2.5-2H20"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z"/><path d="m19 14 1.2 2.8L23 18l-2.8 1.2L19 22l-1.2-2.8L15 18l2.8-1.2L19 14Z"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.8 1.8 18.5A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.5L13.7 3.8a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 17 5l3 2M4 17l3 2a7 7 0 0 0 11.4-4"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7.4 6.6 4.4"/></symbol>
+  <symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 6c3 0 3-3 6-3s3 3 6 3 3-3 6-3M2 12c3 0 3-3 6-3s3 3 6 3 3-3 6-3M2 18c3 0 3-3 6-3s3 3 6 3 3-3 6-3"/></symbol>
+</svg>
+
+<!-- ========== هدر ========== -->
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="#home" aria-label="صفحه اصلی">
+      <span class="brand-mark"><svg class="icon"><use href="#i-compass"/></svg></span>
+      <span class="brand-copy"><strong>گردشگری ایران</strong><span>اطلس هوشمند جاذبه‌های ایران</span></span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="ناوبری اصلی">
+      <a class="active" href="#home">صفحه اصلی</a>
+      <a href="#atlas">نقشه اطلس</a>
+      <a href="#provinces">استان‌ها</a>
+      <a href="#collections">مجموعه‌های موضوعی</a>
+      <a href="#discovery">کشف و ماجراجویی</a>
+      <a href="#about">درباره اطلس</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="header-search" id="focus-search" aria-label="رفتن به جست‌وجو"><svg class="icon"><use href="#i-search"/></svg></button>
+      <button class="primary-btn" id="open-submit"><svg class="icon"><use href="#i-plus"/></svg><span>ثبت جاذبه</span></button>
+      <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="منو" aria-expanded="false"><svg class="icon"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ========== Hero ========== -->
+  <section class="hero" id="home">
+    <div class="hero-background"></div>
+    <div class="container hero-inner">
+      <div class="hero-content">
+        <div class="hero-kicker"><span class="dot"></span>فراتر از دیدنی‌های همیشگی</div>
+        <h1>ایران را از نو <em>کشف کن.</em></h1>
+        <p class="hero-description">از شکوه بناهای تاریخی تا رازهای پنهان طبیعت، از روستاهای دورافتاده تا آیین‌ها و خوراک‌های محلی؛ در اطلس تعاملی ایران، هر جاذبه داستانی برای کشف دارد.</p>
+        <form class="hero-search" id="hero-search-form" role="search">
+          <svg class="icon"><use href="#i-search"/></svg>
+          <input id="hero-search-input" type="search" placeholder="نام مکان، استان، پدیده یا تجربه..." aria-label="جست‌وجو" autocomplete="off">
+          <button class="primary-btn" type="submit">شروع کشف <svg class="icon"><use href="#i-arrow-left"/></svg></button>
+        </form>
+        <div class="popular-searches">
+          <span>جست‌وجوهای پرطرفدار:</span>
+          <button data-query="آبشار">آبشارها</button>
+          <button data-query="سنگ‌نگاره">سنگ‌نگاره‌ها</button>
+          <button data-query="کویر">کویرها</button>
+          <button data-query="کاروانسرا">کاروانسراها</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>۳۱</strong><span>استان برای کشف</span></div>
+          <div class="hero-stat"><strong id="hero-place-count">۰</strong><span>جاذبه در اطلس</span></div>
+          <div class="hero-stat"><strong>∞</strong><span>داستان برای شناختن</span></div>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div class="hero-feature-card">
+          <div class="hero-feature-image"><div><small>پیشنهاد برای ماجراجویی بعدی</small><strong>جایی دور از مسیرهای همیشگی</strong></div></div>
+          <div class="hero-feature-footer">
+            <span>طبیعت، تاریخ و تجربه‌های تازه را دنبال کن.</span>
+            <button class="round-arrow" id="hero-discover" aria-label="کشف"><svg class="icon"><use href="#i-arrow-left"/></svg></button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ========== دسترسی سریع ========== -->
+  <section class="quick-section"><div class="container"><div class="quick-grid" id="quick-grid"></div></div></section>
+
+  <!-- ========== کشف ========== -->
+  <section class="discovery-section" id="discovery">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">هر بار، یک کشف تازه</span><h2>از مسیرهای تکراری فاصله بگیر</h2><p>گاهی بهترین مقصد، جایی است که هنوز نامش را نشنیده‌ای.</p></div>
+        <button class="text-link" id="random-discover">غافلگیرم کن <svg class="icon"><use href="#i-arrow-left"/></svg></button>
+      </div>
+      <div class="discovery-grid">
+        <article class="discovery-main">
+          <div class="discovery-content">
+            <span class="tag">کشف تصادفی هدفمند</span>
+            <h3>هر گوشه ایران، جهانی برای کشف کردن</h3>
+            <p>یک پدیده طبیعی، یک اثر کوچک تاریخی یا یک تجربه محلی را کشف کن. پیشنهادها از میان نمونه‌های موجود انتخاب می‌شوند.</p>
+            <button class="primary-btn" id="discover-random-main"><svg class="icon"><use href="#i-sparkles"/></svg> کشف یک جاذبه</button>
+          </div>
+        </article>
+        <div class="discovery-side">
+          <article class="mini-promo">
+            <div class="mini-promo-image" style="background-image:url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=600&q=80')"></div>
+            <div><h3>داستان‌هایی پشت دیوارهای قدیمی</h3><p>معماری، آثار تاریخی و نشانه‌هایی از زندگی در گذشته را دنبال کن.</p><button class="text-link" data-category-link="تاریخی">کاوش در میراث تاریخی <svg class="icon"><use href="#i-arrow-left"/></svg></button></div>
+          </article>
+          <article class="mini-promo">
+            <div class="mini-promo-image" style="background-image:url('https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=600&q=80')"></div>
+            <div><h3>طبیعت را مسئولانه بشناس</h3><p>چشم‌اندازها، پدیده‌های طبیعی و مسیرهایی با اطلاعات دسترسی روشن.</p><button class="text-link" data-category-link="طبیعی">کشف طبیعت ایران <svg class="icon"><use href="#i-arrow-left"/></svg></button></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== نقشه ========== -->
+  <section class="atlas-section" id="atlas">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">قلب تپنده اطلس</span><h2>ایران را روی نقشه کشف کن</h2><p>جست‌وجو کن، لایه‌ها را تغییر بده و از نمای کلی به جزئیات برس.</p></div>
+      </div>
+      <div class="atlas-shell">
+        <div class="atlas-top">
+          <div><h2>نقشه تعاملی جاذبه‌ها</h2><p>نمونه اولیه رابط نقشه‌محور گردشگری ایران — سرویس نقشه نشان</p></div>
+          <div class="atlas-top-actions">
+            <button class="secondary-btn" id="open-filters"><svg class="icon"><use href="#i-filter"/></svg> فیلترها</button>
+            <button class="secondary-btn" id="reset-atlas"><svg class="icon"><use href="#i-refresh"/></svg> بازنشانی</button>
+          </div>
+        </div>
+        <div class="atlas-layout">
+          <div class="map-column">
+            <div id="iran-map" role="application" aria-label="نقشه تعاملی"></div>
+            <form class="map-floating-search" id="map-search-form" role="search">
+              <svg class="icon"><use href="#i-search"/></svg>
+              <input id="map-search-input" type="search" placeholder="جست‌وجو روی نقشه..." aria-label="جست‌وجو">
+            </form>
+            <div class="map-layer-control">
+              <button class="map-layer-btn" id="map-zoom-in" aria-label="بزرگ‌نمایی"><svg class="icon"><use href="#i-plus"/></svg></button>
+              <button class="map-layer-btn" id="map-zoom-out" aria-label="کوچک‌نمایی"><svg class="icon"><use href="#i-minus"/></svg></button>
+              <button class="map-layer-btn" id="map-reset-view" aria-label="نمای ایران"><svg class="icon"><use href="#i-crosshair"/></svg></button>
+              <button class="map-layer-btn" id="map-layer-toggle" aria-label="لایه"><svg class="icon"><use href="#i-layers"/></svg></button>
+            </div>
+            <div class="map-bottom-info">
+              <div class="map-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#43865f"></span> طبیعی</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#c09142"></span> تاریخی</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#6a85b4"></span> زمین‌شناسی</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#9b6b9c"></span> فرهنگی</span>
+              </div>
+              <span class="map-credit">نقشه: نشان</span>
+            </div>
+          </div>
+          <aside class="results-panel">
+            <div class="results-header">
+              <div class="results-header-row">
+                <h3>جاذبه‌های قابل کشف</h3>
+                <span class="results-count"><span id="results-count">۰</span> مورد</span>
+              </div>
+              <div class="filter-bar">
+                <select id="filter-category" class="filter-select" aria-label="فیلتر نوع">
+                  <option value="">همه موضوعات</option>
+                  <option value="طبیعی">طبیعی</option><option value="تاریخی">تاریخی</option>
+                  <option value="زمین‌شناسی">زمین‌شناسی</option><option value="فرهنگی">فرهنگی</option>
+                  <option value="خوراک">خوراک</option><option value="مسیر">مسیر</option>
+                </select>
+                <select id="filter-province" class="filter-select" aria-label="فیلتر استان">
+                  <option value="">همه استان‌ها</option>
+                </select>
+              </div>
+              <div class="active-filters" id="active-filters"></div>
+            </div>
+            <div class="results-toolbar">
+              <span id="results-summary">نمونه‌های نمایشی اطلس</span>
+              <select id="sort-results" aria-label="مرتب‌سازی">
+                <option value="default">ترتیب پیشنهادی</option>
+                <option value="name">نام جاذبه</option>
+                <option value="province">استان</option>
+                <option value="difficulty">دسترسی آسان‌تر</option>
+              </select>
+            </div>
+            <div class="results-list" id="results-list" aria-live="polite"></div>
+            <div class="results-footer">
+              <button class="secondary-btn" id="show-saved"><svg class="icon"><use href="#i-bookmark"/></svg> نمایش فهرست ذخیره‌شده</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== استان‌ها ========== -->
+  <section class="provinces-section" id="provinces">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">از شمال تا جنوب</span><h2>از کدام استان شروع می‌کنی؟</h2><p>یک استان را انتخاب کن تا جاذبه‌های نمونه آن را روی اطلس ببینی.</p></div>
+        <button class="text-link" id="all-provinces">مشاهده همه استان‌ها <svg class="icon"><use href="#i-arrow-left"/></svg></button>
+      </div>
+      <div class="provinces-grid" id="provinces-grid"></div>
+    </div>
+  </section>
+
+  <!-- ========== مجموعه‌ها ========== -->
+  <section class="collections-section" id="collections">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">فراتر از مرزهای استان‌ها</span><h2>مجموعه‌هایی برای کشف عمیق‌تر</h2><p>موضوعی را دنبال کن.</p></div>
+      </div>
+      <div class="collections-grid">
+        <article class="collection-card">
+          <div class="collection-image" style="background-image:url('https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=800&q=80')"><span>میراث تاریخی</span></div>
+          <div class="collection-body"><h3>رد پای تاریخ</h3><p>بناهای تاریخی، سازه‌های کهن و آثار ارزشمند از دوره‌های مختلف.</p><div class="collection-footer"><span>معماری و باستان‌شناسی</span><button class="text-link" data-collection="تاریخی" aria-label="مشاهده"><svg class="icon"><use href="#i-arrow-left"/></svg></button></div></div>
+        </article>
+        <article class="collection-card">
+          <div class="collection-image" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=80')"><span>طبیعت</span></div>
+          <div class="collection-body"><h3>شگفتی‌های زمین</h3><p>چشم‌اندازها، کوه‌ها، پدیده‌های طبیعی و سازندهای زمین‌شناسی.</p><div class="collection-footer"><span>طبیعی و زمین‌شناسی</span><button class="text-link" data-collection="طبیعی" aria-label="مشاهده"><svg class="icon"><use href="#i-arrow-left"/></svg></button></div></div>
+        </article>
+        <article class="collection-card">
+          <div class="collection-image" style="background-image:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80')"><span>فرهنگ غذایی</span></div>
+          <div class="collection-body"><h3>ایران بر سر سفره</h3><p>خوراک‌های بومی، محصولات محلی و داستان‌های پشت طعم‌های منطقه‌ای.</p><div class="collection-footer"><span>خوراک و فرهنگ</span><button class="text-link" data-collection="خوراک" aria-label="مشاهده"><svg class="icon"><use href="#i-arrow-left"/></svg></button></div></div>
+        </article>
+        <article class="collection-card">
+          <div class="collection-image" style="background-image:url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80')"><span>مسیرهای سفر</span></div>
+          <div class="collection-body"><h3>سفرهای کوچک، کشف‌های بزرگ</h3><p>ایده‌هایی برای کنار هم قرار دادن چند جاذبه در یک برنامه سفر.</p><div class="collection-footer"><span>مسیر و تجربه</span><button class="text-link" data-collection="مسیر" aria-label="مشاهده"><svg class="icon"><use href="#i-arrow-left"/></svg></button></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== گذرنامه ========== -->
+  <section class="passport-section">
+    <div class="container">
+      <div class="passport-shell">
+        <div>
+          <span class="eyebrow">دفتر سفر شخصی تو</span>
+          <h2>گذرنامه دیجیتال ایران</h2>
+          <p>مکان‌های موردعلاقه‌ات را ذخیره کن، برای سفرهای آینده فهرست بساز و جاذبه‌هایی را که بازدید کرده‌ای ثبت کن. کشف مسئولانه، مهم‌تر از تعداد مقصدهاست.</p>
+          <button class="primary-btn" id="open-passport"><svg class="icon"><use href="#i-bookmark"/></svg> مشاهده فهرست من <svg class="icon"><use href="#i-arrow-left"/></svg></button>
+        </div>
+        <div class="passport-visual" aria-hidden="true">
+          <div class="passport-card">
+            <div class="passport-emblem"><svg class="icon"><use href="#i-compass"/></svg></div>
+            <div><small>گذرنامه کشف ایران</small><strong>ایران‌گردی من</strong><small>هر مکان، یک داستان تازه</small></div>
+            <svg class="icon" style="width:34px;height:34px;color:#c4dba5"><use href="#i-mountain"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== اعتماد ========== -->
+  <section class="trust-section" id="about">
+    <div class="container">
+      <div class="section-heading"><div><span class="eyebrow">کشف آگاهانه</span><h2>اعتماد، دقت و حفاظت در اولویت‌اند</h2><p>اطلس خوب فقط مکان‌ها را نشان نمی‌دهد؛ به اعتبار اطلاعات و پیامدهای بازدید هم توجه می‌کند.</p></div></div>
+      <div class="trust-grid">
+        <article class="trust-card"><div class="trust-icon"><svg class="icon"><use href="#i-shield"/></svg></div><div><h3>اطلاعات با منشأ مشخص</h3><p>وضعیت اعتبار، تاریخ بازبینی و منابع اطلاعات باید قابل مشاهده باشند.</p></div></article>
+        <article class="trust-card"><div class="trust-icon"><svg class="icon"><use href="#i-leaf"/></svg></div><div><h3>حفاظت از میراث و طبیعت</h3><p>مختصات حساس، مسیرهای خطرناک و مکان‌های فاقد دسترسی عمومی باید مطابق سیاست‌های حفاظتی مدیریت شوند.</p></div></article>
+        <article class="trust-card"><div class="trust-icon"><svg class="icon"><use href="#i-users"/></svg></div><div><h3>مشارکت همراه با بررسی</h3><p>پیشنهادهای کاربران پیش از انتشار عمومی باید فرایند بررسی و اعتبارسنجی را طی کنند.</p></div></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ========== فوتر ========== -->
+<footer class="footer">
+  <div class="container footer-main">
+    <div class="footer-about">
+      <a class="brand" href="#home"><span class="brand-mark"><svg class="icon"><use href="#i-compass"/></svg></span><span class="brand-copy"><strong>گردشگری ایران</strong><span>اطلس هوشمند جاذبه‌های ایران</span></span></a>
+      <p>تلاشی برای ثبت، شناخت و کشف جاذبه‌ها و ریزجاذبه‌های ایران؛ از آثار شناخته‌شده تا پدیده‌های کوچک طبیعی و روایت‌های محلی.</p>
+    </div>
+    <div><h3>اکتشاف</h3><nav class="footer-links"><a href="#atlas">نقشه تعاملی</a><a href="#provinces">استان‌های ایران</a><a href="#collections">مجموعه‌های موضوعی</a><a href="#discovery">کشف تصادفی</a></nav></div>
+    <div><h3>مشارکت</h3><nav class="footer-links"><a href="#about">درباره اطلس</a><a href="#" id="footer-submit">ثبت جاذبه جدید</a><a href="#" id="footer-report">گزارش خطا</a><a href="#" id="footer-privacy">حریم خصوصی</a></nav></div>
+    <div><h3>همراه اطلس بمان</h3><p style="color:#a9b8ad;font-size:11px;line-height:2">ایمیل خود را برای دریافت پیشنهادهای کشف وارد کن.</p>
+      <form class="newsletter-form" id="newsletter-form"><input type="email" required placeholder="نشانی ایمیل" aria-label="ایمیل"><button type="submit" aria-label="ثبت"><svg class="icon"><use href="#i-arrow-left"/></svg></button></form>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span id="current-year"></span> گردشگری ایران — نسخه نمایشی</span>
+    <span>طراحی‌شده برای کشف مسئولانه و شناخت عمیق‌تر ایران</span>
+    <a href="#home">بازگشت به بالا ↑</a>
+  </div>
+</footer>
+
+<!-- ========== مودال ثبت / گزارش ========== -->
+<div class="modal-backdrop" id="submit-modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header"><h2 id="submit-modal-title">پیشنهاد ثبت یک جاذبه</h2><button class="modal-close" data-close-modal aria-label="بستن"><svg class="icon"><use href="#i-x"/></svg></button></div>
+    <div class="modal-body">
+      <p class="form-hint" style="margin:0 0 18px">اطلاعات را دقیق وارد کن. پیشنهادها با وضعیت «نیازمند بررسی» ثبت می‌شوند.</p>
+      <form id="submit-form">
+        <div class="form-grid">
+          <div class="form-field"><label for="submission-name">نام جاذبه *</label><input id="submission-name" name="name" required maxlength="160"></div>
+          <div class="form-field"><label for="submission-type">نوع موجودیت *</label><select id="submission-type" name="type" required><option value="">انتخاب</option><option>جاذبه طبیعی</option><option>اثر تاریخی</option><option>پدیده زمین‌شناسی</option><option>مکان فرهنگی</option><option>خوراک یا محصول بومی</option><option>مسیر گردشگری</option><option>سایر</option></select></div>
+          <div class="form-field"><label for="submission-province">استان</label><select id="submission-province" name="province"><option value="">انتخاب</option></select></div>
+          <div class="form-field"><label for="submission-locality">شهرستان</label><input id="submission-locality" name="locality" maxlength="160"></div>
+          <div class="form-field"><label for="submission-lat">عرض جغرافیایی</label><input id="submission-lat" name="lat" type="number" step="any" min="-90" max="90"></div>
+          <div class="form-field"><label for="submission-lng">طول جغرافیایی</label><input id="submission-lng" name="lng" type="number" step="any" min="-180" max="180"></div>
+          <div class="form-field full"><label for="submission-reason">چرا این جاذبه ارزش معرفی دارد؟ *</label><textarea id="submission-reason" name="reason" required maxlength="3000"></textarea></div>
+          <div class="form-field full"><label for="submission-source">منبع یا شواهد</label><input id="submission-source" name="source" maxlength="500"></div>
+          <div class="form-field full"><label for="submission-access">شرایط دسترسی و هشدارها</label><textarea id="submission-access" name="access" maxlength="1500"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="primary-btn" type="submit" id="submit-submit-btn"><svg class="icon"><use href="#i-send"/></svg> ثبت پیشنهاد</button>
+          <button class="secondary-btn" type="button" data-close-modal>انصراف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========== مودال جزئیات ========== -->
+<div class="modal-backdrop" id="detail-modal" role="dialog" aria-modal="true">
+  <div class="modal modal-wide"><div id="detail-content"></div></div>
+</div>
+
+<!-- ========== مودال فیلترها ========== -->
+<div class="modal-backdrop" id="filters-modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header"><h2>فیلترهای پیشرفته</h2><button class="modal-close" data-close-modal aria-label="بستن"><svg class="icon"><use href="#i-x"/></svg></button></div>
+    <div class="modal-body">
+      <form id="advanced-filter-form">
+        <div class="form-grid">
+          <div class="form-field"><label>حوزه موضوعی</label><select id="advanced-category"><option value="">همه</option><option>طبیعی</option><option>تاریخی</option><option>زمین‌شناسی</option><option>فرهنگی</option><option>خوراک</option><option>مسیر</option></select></div>
+          <div class="form-field"><label>استان</label><select id="advanced-province"><option value="">همه</option></select></div>
+          <div class="form-field"><label>دشواری دسترسی</label><select id="advanced-difficulty"><option value="">همه</option><option>آسان</option><option>متوسط</option><option>دشوار</option><option>نامشخص</option></select></div>
+          <div class="form-field"><label>فصل مناسب</label><select id="advanced-season"><option value="">همه</option><option>بهار</option><option>تابستان</option><option>پاییز</option><option>زمستان</option><option>چهارفصل</option></select></div>
+          <div class="form-field"><label>مدت بازدید</label><select id="advanced-duration"><option value="">همه</option><option value="کوتاه">کمتر از ۲ ساعت</option><option value="نیم‌روز">۲ تا ۵ ساعت</option><option value="روزانه">یک روز یا بیشتر</option></select></div>
+          <div class="form-field"><label>وضعیت</label><select id="advanced-status"><option value="">همه</option><option>نمونه نمایشی</option><option>تأییدشده</option><option>نیازمند بررسی</option></select></div>
+        </div>
+        <div class="form-actions"><button class="primary-btn" type="submit"><svg class="icon"><use href="#i-filter"/></svg> اعمال</button><button class="secondary-btn" type="button" id="clear-advanced-filters">پاک کردن</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========== مودال گذرنامه ========== -->
+<div class="modal-backdrop" id="passport-modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header"><h2>گذرنامه دیجیتال ایران</h2><button class="modal-close" data-close-modal aria-label="بستن"><svg class="icon"><use href="#i-x"/></svg></button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:20px">
+        <div class="detail-fact"><span>ذخیره‌شده‌ها</span><strong id="passport-saved-count">۰ جاذبه</strong></div>
+        <div class="detail-fact"><span>بازدیدشده‌ها</span><strong id="passport-visited-count">۰ جاذبه</strong></div>
+        <div class="detail-fact"><span>استان‌های کشف‌شده</span><strong id="passport-province-count">۰ استان</strong></div>
+      </div>
+      <div id="passport-list"></div>
+      <div class="form-actions"><button class="secondary-btn" id="export-passport"><svg class="icon"><use href="#i-book"/></svg> دریافت نسخه متنی</button></div>
+      <p class="form-hint">این گذرنامه نسخه نمایشی است.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast-region" id="toast-region" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
