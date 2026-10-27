@@ -1,17 +1,8 @@
-# README.md
-
-```markdown
-# 🧭 Iran Tourism Atlas
+# Iran Tourism Atlas
 
 > **An intelligent, interactive web-based atlas for discovering Iran's natural, historical, cultural, and lesser-known attractions.**
 
-[![Made with](https://img.shields.io/badge/made%20with-HTML%20%7C%20CSS%20%7C%20JS%20%7C%20Java-blue)](https://)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-demo-orange.svg)]()
-
----
-
-## 📖 Overview
+## Overview
 
 **Iran Tourism Atlas** is a full-stack, map-centric web application that provides an interactive atlas of Iran's attractions. It pairs a lightweight vanilla JavaScript frontend (HTML5 + CSS3) with a Spring Boot REST API backend. The interface is designed entirely in **Persian (RTL)** with a modern, accessible, and responsive layout.
 
@@ -19,16 +10,16 @@ The project intentionally avoids front-end frameworks and third-party libraries 
 
 ---
 
-## ✨ Features
+## Features
 
-### 🗺️ Interactive Map (Neshan SDK)
+### Interactive Map (Neshan SDK)
 - Full-screen Leaflet-based map powered by the **Neshan Maps API**
 - Cluster-based marker rendering with category-aware colors and icons
 - Zoom controls, layer toggling, and "reset view" shortcut
 - Floating map search bar with debounced live results
 - Legend for attraction categories (natural, historical, geological, cultural)
 
-### 🔍 Discovery & Filtering
+### Discovery & Filtering
 - Full-text search over name, province, locality, category, type, tags, and description
 - Filter chips with the ability to remove individual active filters
 - Advanced filter modal (category, province, difficulty, season, duration, status)
@@ -36,41 +27,41 @@ The project intentionally avoids front-end frameworks and third-party libraries 
 - Debounced progressive loading (50 results per page chunk)
 - Randomized "Discover" feature that surfaces lesser-known attractions
 
-### 📍 Attraction Details
+### Attraction Details
 - Rich modal with cover image, verified-status badge, and alert banners
 - Accessibility, season, duration, province, and entity type facts
 - Guided-visit tips and relevance tags
 - Share via Web Share API (fallback to clipboard)
 - Inline report-and-correct workflow
 
-### 🧳 Digital Passport
+### Digital Passport
 - Save/unsave attractions per user (identified by a browser-scoped `X-Client-Id`)
 - Mark attractions as visited
 - Live stats: saved count, visited count, provinces discovered
 - Persistent state loaded from the API on startup
 - Plain-text export of the passport (`iran-tourism-passport.txt`)
 
-### 📝 User Contributions
+### User Contributions
 - **Submit new attractions** with name, type, province, locality, coordinates, reason, source, and access notes
 - **Report corrections** on existing attractions
 - Submissions are stored with `نیازمند بررسی` ("pending review") status
 
-### 🎨 Design
+### Design
 - Persian (RTL) typography with **Vazirmatn** font
 - Custom icon system built with inline SVG `<symbol>` sprites
 - Fully responsive (mobile, tablet, desktop breakpoints)
 - `prefers-reduced-motion` support
 - Accessible modals with focus trapping and keyboard shortcuts
 
-### 🌐 Resilience
+### Resilience
 - Automatic **offline fallback**: if the API is unreachable, the frontend loads a curated static dataset (`RAW_ATTRACTIONS`)
 - Optimistic UI updates for save/visit operations
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                    Browser (RTL)                    │
 │  ┌───────────────────────────────────────────────┐  │
@@ -89,7 +80,7 @@ The project intentionally avoids front-end frameworks and third-party libraries 
 
 ### Project Structure
 
-```
+```text
 iran-tourism-atlas/
 ├── frontend/
 │   ├── index.html
@@ -126,26 +117,26 @@ iran-tourism-atlas/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-| Layer       | Technologies                                                        |
-|-------------|---------------------------------------------------------------------|
-| **Frontend**| HTML5, CSS3 (custom properties, Grid, Flexbox), Vanilla JavaScript (ES2020+) |
-| **Maps**    | Leaflet 1.9.4 + Neshan SDK 1.0.8 + Leaflet.markercluster 1.5.3      |
-| **Typography** | Vazirmatn (Google Fonts)                                         |
-| **Backend** | Java 17, Spring Boot 3.2, Spring Web, Spring Validation             |
+| Layer | Technologies |
+|---|---|
+| **Frontend** | HTML5, CSS3 (custom properties, Grid, Flexbox), Vanilla JavaScript (ES2020+) |
+| **Maps** | Leaflet 1.9.4 + Neshan SDK 1.0.8 + Leaflet.markercluster 1.5.3 |
+| **Typography** | Vazirmatn (Google Fonts) |
+| **Backend** | Java 17, Spring Boot 3.2, Spring Web, Spring Validation |
 | **Storage** | In-memory `ConcurrentHashMap` (swap for JPA/PostgreSQL in production) |
-| **Build**   | Maven                                                               |
+| **Build** | Maven |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - **Node.js** (optional, only for static file serving)
 - **JDK 17+**
 - **Maven 3.8+**
-- A modern browser with `fetch`, `crypto.randomUUID`, and `<dialog>`/modal support
+- A modern browser with `fetch`, `crypto.randomUUID`, and modal support
 
 ### 1. Clone the repository
 
@@ -162,7 +153,7 @@ The frontend uses the **Neshan** map service. The key is defined in `frontend/js
 const NESHAN_API_KEY = "web.624be8c281c1439a8183326986ac35a0";
 ```
 
-> ⚠️ **Important:** Replace this with your own Neshan API key. Obtain one for free at [neshan.org](https://platform.neshan.org/).
+> **Important:** Replace this with your own Neshan API key. Obtain one for free at [neshan.org](https://platform.neshan.org/).
 
 ### 3. Run the backend
 
@@ -183,7 +174,7 @@ python3 -m http.server 3000
 
 Then open **`http://localhost:3000`**.
 
-> 💡 The frontend expects the API at `/api`. If you run the frontend on a different origin, configure a dev proxy or set `window.__API_BASE__ = "http://localhost:8080/api"` before `app.js` loads.
+> The frontend expects the API at `/api`. If you run the frontend on a different origin, configure a dev proxy or set `window.__API_BASE__ = "http://localhost:8080/api"` before `app.js` loads.
 
 ### 5. (Optional) Seed bulk data
 
@@ -201,11 +192,11 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ### Places
 
-| Method | Path                      | Description                          |
-|--------|---------------------------|--------------------------------------|
-| `GET`  | `/api/places`             | List places (paginated)              |
-| `GET`  | `/api/places/{id}`        | Get a single place                   |
-| `POST` | `/api/places/bulk`        | Bulk insert/upsert places            |
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/places` | List places (paginated) |
+| `GET` | `/api/places/{id}` | Get a single place |
+| `POST` | `/api/places/bulk` | Bulk insert/upsert places |
 
 **Example** — `GET /api/places?page=0&size=20`
 
@@ -232,24 +223,24 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ### Passport (Saved / Visited)
 
-| Method   | Path                                  | Description                          |
-|----------|---------------------------------------|--------------------------------------|
-| `GET`    | `/api/passport/saved`                 | List saved places for this client    |
-| `GET`    | `/api/passport/visited`               | List visited places for this client  |
-| `POST`   | `/api/passport/saved/{placeId}`       | Add a place to the saved list        |
-| `DELETE` | `/api/passport/saved/{placeId}`       | Remove a place from the saved list   |
-| `POST`   | `/api/passport/visited/{placeId}`     | Mark a place as visited              |
-| `DELETE` | `/api/passport/visited/{placeId}`     | Unmark a place as visited            |
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/passport/saved` | List saved places for this client |
+| `GET` | `/api/passport/visited` | List visited places for this client |
+| `POST` | `/api/passport/saved/{placeId}` | Add a place to the saved list |
+| `DELETE` | `/api/passport/saved/{placeId}` | Remove a place from the saved list |
+| `POST` | `/api/passport/visited/{placeId}` | Mark a place as visited |
+| `DELETE` | `/api/passport/visited/{placeId}` | Unmark a place as visited |
 
 **Header required:** `X-Client-Id: <uuid>` (generated automatically by the frontend and stored in `localStorage`).
 
 ### Submissions
 
-| Method | Path                       | Description                        |
-|--------|----------------------------|------------------------------------|
-| `POST` | `/api/submissions`         | Submit a new attraction            |
-| `POST` | `/api/submissions/report`  | Report an error on existing place  |
-| `GET`  | `/api/submissions`         | List all submissions (admin)       |
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/submissions` | Submit a new attraction |
+| `POST` | `/api/submissions/report` | Report an error on existing place |
+| `GET` | `/api/submissions` | List all submissions (admin) |
 
 **Example** — `POST /api/submissions`
 
@@ -269,30 +260,30 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ### Newsletter
 
-| Method | Path               | Description           |
-|--------|--------------------|-----------------------|
-| `POST` | `/api/newsletter`  | Subscribe an email    |
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/newsletter` | Subscribe an email |
 
 ---
 
-## 🎨 UI Structure
+## UI Structure
 
-| Section             | Purpose                                                      |
-|---------------------|--------------------------------------------------------------|
-| `#home` — Hero      | Search bar, popular searches, discovery statistics           |
-| Quick access grid   | One-click category filtering                                 |
-| `#discovery`        | Curated promos + random discovery                            |
-| `#atlas`            | Map + result list + advanced filters                         |
-| `#provinces`        | 31 province cards with images                                |
-| `#collections`      | Thematic collections (history, nature, food, routes)         |
-| Digital passport    | Save/visit counters and export                               |
-| `#about`            | Trust principles                                             |
-| Modals              | Detail, filters, submission, report, passport                |
-| Toast region        | Non-blocking notifications                                   |
+| Section | Purpose |
+|---|---|
+| `#home` — Hero | Search bar, popular searches, discovery statistics |
+| Quick access grid | One-click category filtering |
+| `#discovery` | Curated promos + random discovery |
+| `#atlas` | Map + result list + advanced filters |
+| `#provinces` | 31 province cards with images |
+| `#collections` | Thematic collections (history, nature, food, routes) |
+| Digital passport | Save/visit counters and export |
+| `#about` | Trust principles |
+| Modals | Detail, filters, submission, report, passport |
+| Toast region | Non-blocking notifications |
 
 ---
 
-## ♿ Accessibility
+## Accessibility
 
 - **Focus trapping** in modals with Tab/Shift+Tab navigation
 - **`Escape`** closes modals; **`/`** focuses the global search
@@ -303,7 +294,7 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Frontend
 
@@ -313,15 +304,15 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ### Backend
 
-| Property                       | Default | Description                        |
-|--------------------------------|---------|------------------------------------|
-| `server.port`                  | `8080`  | HTTP port                          |
-| `spring.application.name`      | —       | Application identifier             |
-| `logging.level.root`           | `INFO`  | Log level                          |
+| Property | Default | Description |
+|---|---|---|
+| `server.port` | `8080` | HTTP port |
+| `spring.application.name` | — | Application identifier |
+| `logging.level.root` | `INFO` | Log level |
 
 ---
 
-## 🧪 Testing
+## Testing
 
 > The demo ships without automated tests. Recommended starting points:
 
@@ -330,7 +321,7 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Persist data to PostgreSQL with JPA/Flyway
 - [ ] Authentication & per-user passports
@@ -343,7 +334,7 @@ All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` requ
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -354,17 +345,19 @@ Contributions are welcome! Please follow these steps:
 5. Open a pull request with a description of the change and any related issues.
 
 Please respect the project's commitment to:
+
 - **Data integrity** — sources and review status must be explicit.
 - **Site safety** — sensitive coordinates and dangerous routes are governed by protection policies.
 - **Responsible travel** — the atlas discourages irresponsible visitation.
 
 ---
 
-## 📄 License
+## License
 
 This project is released under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 Third-party components retain their own licenses:
+
 - [Leaflet](https://leafletjs.com/) — BSD-2-Clause
 - [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) — MIT
 - [Neshan Maps SDK](https://platform.neshan.org/) — Neshan Terms of Service
@@ -372,46 +365,14 @@ Third-party components retain their own licenses:
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Neshan Maps** for the map infrastructure and SDK
 - The **Vazirmatn** team for the Persian typeface
 - The **Leaflet** community for marker clustering
 - All contributors who help document Iran's diverse attractions responsibly
 
----
-
-## 📬 Contact
-
-For questions, suggestions, or collaborations, please open an issue or contact the maintainers at **[maintainers@example.com](mailto:maintainers@example.com)**.
-
----
-
-<div align="center">
-
-**Made with ❤️ for responsible discovery of Iran**
 
 *اطلس هوشمند جاذبه‌های ایران*
 
 </div>
-```
-
----
-
-## Notes on this README
-
-| Section | Why it's included |
-|---|---|
-| **Badges** | Quick visual signal of stack, license, and demo status |
-| **Overview** | One-paragraph explanation of *what* and *why*, mentioning the RTL/Persian-first design and no-jQuery constraint |
-| **Features** | Grouped by user-facing domain (map, discovery, passport, contributions, design, resilience) so reviewers can skim |
-| **Architecture** | ASCII diagram + tree — helps new contributors orient in <30 seconds |
-| **Tech Stack table** | Explicit about *not* using frameworks on the frontend |
-| **Getting Started** | Numbered steps, copy-pasteable commands, and a bold callout for the **Neshan API key** (a common setup trap) |
-| **API Reference** | Full endpoint table with a working JSON example — required for anyone wiring the frontend to a different backend |
-| **UI Structure** | Maps DOM section IDs to product intent so designers can navigate |
-| **Accessibility** | Short but concrete; most portfolios omit this |
-| **Configuration** | Frontend + backend, in one place |
-| **Roadmap** | Communicates project maturity and direction without overpromising |
-| **Contributing** | Reinforces the three editorial principles baked into the product |
-| **License & Acknowledgments** | Legally correct per-dependency attribution, including Neshan's ToS |
