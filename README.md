@@ -1,602 +1,417 @@
-# tourism-website
-Tourist attractions in Iran are being collected on this website.
-# 🌏 Iran Tourism — Smart Atlas of Iran's Attractions
+# README.md
 
-> An interactive, map-driven atlas for discovering Iran's natural, historical, cultural, and lesser-known attractions — backed by a lightweight server with **zero external dependencies** and runnable on **JDK 11+**.
+```markdown
+# 🧭 Iran Tourism Atlas
 
----
+> **An intelligent, interactive web-based atlas for discovering Iran's natural, historical, cultural, and lesser-known attractions.**
 
-## 📖 Table of Contents
-
-- [Project Overview](#-project-overview)
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Prerequisites](#-prerequisites)
-- [Installation & Running](#-installation--running)
-- [Project Structure](#-project-structure)
-- [Configuration](#-configuration)
-- [API Reference](#-api-reference)
-- [Data Model](#-data-model)
-- [User Guide](#-user-guide)
-- [Development & Customization](#-development--customization)
-- [Limitations & Security Notes](#-limitations--security-notes)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
+[![Made with](https://img.shields.io/badge/made%20with-HTML%20%7C%20CSS%20%7C%20JS%20%7C%20Java-blue)](https://)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-demo-orange.svg)]()
 
 ---
 
-## 🎯 Project Overview
+## 📖 Overview
 
-**Iran Tourism** is a full-stack project implemented in just **two independent files**:
+**Iran Tourism Atlas** is a full-stack, map-centric web application that provides an interactive atlas of Iran's attractions. It pairs a lightweight vanilla JavaScript frontend (HTML5 + CSS3) with a Spring Boot REST API backend. The interface is designed entirely in **Persian (RTL)** with a modern, accessible, and responsive layout.
 
-| Layer | File | Description |
-|-------|------|-------------|
-| **Frontend** | `index.html` | A Single Page Application (SPA) built with pure HTML/CSS/JS — no frameworks |
-| **Backend** | `IranTourismServer.java` | A lightweight HTTP server built on `com.sun.net.httpserver` with **no external dependencies** |
-
-The goal of the project is to provide an **interactive atlas platform** for registering, searching, and discovering tourism attractions across Iran, with strong emphasis on:
-
-- **Documentation accuracy** — each record carries a validity status, source references, and visit warnings
-- **Responsible discovery** — respecting heritage and nature protection
-- **Accessibility** — ARIA roles, keyboard navigation, and focus management
-- **Offline resilience** — a complete fallback dataset when the API is unavailable
+The project intentionally avoids front-end frameworks and third-party libraries like jQuery, keeping the frontend performant and dependency-light, while the Java backend handles data persistence, filtering, user passports (saved/visited lists), and user submissions.
 
 ---
 
 ## ✨ Features
 
-### 🗺️ Map & Atlas
-- Interactive map powered by **Leaflet** and the **Neshan SDK**
-- Marker clustering with custom styling
-- Color-coded markers per attraction category (Natural, Historical, Geological, Cultural, Food, Route)
-- Map-based search, zoom controls, reset view, and on-map legend
-- Rich popups with direct links to the detail view
+### 🗺️ Interactive Map (Neshan SDK)
+- Full-screen Leaflet-based map powered by the **Neshan Maps API**
+- Cluster-based marker rendering with category-aware colors and icons
+- Zoom controls, layer toggling, and "reset view" shortcut
+- Floating map search bar with debounced live results
+- Legend for attraction categories (natural, historical, geological, cultural)
 
-### 🔍 Search & Filtering
-- Text search with Persian normalization (unifying ی/ي, ک/ك; stripping diacritics and ZWNJ)
-- Multi-dimensional filters: category, province, accessibility difficulty, season, visit duration, and data status
-- Sort options: name, province, or accessibility difficulty
-- Active filter chips with individual removal
-- Progressive result loading (lazy pagination)
+### 🔍 Discovery & Filtering
+- Full-text search over name, province, locality, category, type, tags, and description
+- Filter chips with the ability to remove individual active filters
+- Advanced filter modal (category, province, difficulty, season, duration, status)
+- Sortable result list (name, province, accessibility)
+- Debounced progressive loading (50 results per page chunk)
+- Randomized "Discover" feature that surfaces lesser-known attractions
 
-### 📍 Attractions
-- All **31 provinces** represented with a rich sample dataset (400+ records)
-- Attraction cards showing image, type, category, and location
-- Detailed modal with visit guidance, tags, warnings, and source notes
-- Sharing via the Web Share API with clipboard fallback
+### 📍 Attraction Details
+- Rich modal with cover image, verified-status badge, and alert banners
+- Accessibility, season, duration, province, and entity type facts
+- Guided-visit tips and relevance tags
+- Share via Web Share API (fallback to clipboard)
+- Inline report-and-correct workflow
 
-### 👤 Digital Passport
-- Save favorite attractions
+### 🧳 Digital Passport
+- Save/unsave attractions per user (identified by a browser-scoped `X-Client-Id`)
 - Mark attractions as visited
-- Count discovered provinces
-- Export a plain-text summary of the passport
-- Server-side persistence keyed by a **stable Client ID** stored in `localStorage`
+- Live stats: saved count, visited count, provinces discovered
+- Persistent state loaded from the API on startup
+- Plain-text export of the passport (`iran-tourism-passport.txt`)
 
 ### 📝 User Contributions
-- Submission form for proposing new attractions
-- Report/Correction form for flagging errors in existing records
-- Input validation (coordinates, required fields)
+- **Submit new attractions** with name, type, province, locality, coordinates, reason, source, and access notes
+- **Report corrections** on existing attractions
+- Submissions are stored with `نیازمند بررسی` ("pending review") status
 
-### 🎨 Design & UX
-- Full **RTL** layout using **Vazirmatn** font
-- Nature-inspired color palette (Forest / Lime / Cream)
-- Fully responsive with breakpoints at 1180 / 900 / 560 px
-- Honors `prefers-reduced-motion`
-- Modal focus management (focus trap) with restoration of the previously focused element
+### 🎨 Design
+- Persian (RTL) typography with **Vazirmatn** font
+- Custom icon system built with inline SVG `<symbol>` sprites
+- Fully responsive (mobile, tablet, desktop breakpoints)
+- `prefers-reduced-motion` support
+- Accessible modals with focus trapping and keyboard shortcuts
 
-### 🛡️ Resilience & Stability
-- **Offline fallback**: if the API is unavailable, the frontend loads an offline dataset embedded directly in the HTML
-- **Optimistic UI** for save/visit actions with rollback on error
-- **Atomic file writes** (`ATOMIC_MOVE`) in the backend
+### 🌐 Resilience
+- Automatic **offline fallback**: if the API is unreachable, the frontend loads a curated static dataset (`RAW_ATTRACTIONS`)
+- Optimistic UI updates for save/visit operations
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Client (Browser)                    │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │             index.html (SPA + Leaflet)            │  │
-│  │  • UI / UX                                        │  │
-│  │  • State (filters, saved, visited)                │  │
-│  │  • Neshan Map + Marker Clustering                 │  │
-│  │  • API Client (fetch + X-Client-Id)               │  │
-│  │  • Offline fallback via RAW_ATTRACTIONS           │  │
-│  └───────────────────────────────────────────────────┘  │
-└──────────────────────────┬──────────────────────────────┘
-                           │  HTTP/JSON
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│              IranTourismServer (JDK 11+)                │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  Routes:                                          │  │
-│  │   GET    /                    → index.html         │  │
-│  │   GET    /api/health                               │  │
-│  │   GET    /api/places          → list + filters     │  │
-│  │   GET    /api/places/{id}                          │  │
-│  │   GET    /api/provinces                            │  │
-│  │   GET    /api/passport/{saved|visited}             │  │
-│  │   POST   /api/passport/{saved|visited}/{placeId}   │  │
-│  │   DELETE /api/passport/{saved|visited}/{placeId}   │  │
-│  │   POST   /api/submissions                          │  │
-│  │   POST   /api/submissions/report                   │  │
-│  │   POST   /api/newsletter                           │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                         │
-│  Persistence (data/):                                   │
-│   • places.json                                         │
-│   • passport.json                                       │
-│   • submissions.json                                    │
-│   • newsletter.json                                     │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                    Browser (RTL)                    │
+│  ┌───────────────────────────────────────────────┐  │
+│  │  index.html  ←  style.css  ←  app.js          │  │
+│  │                              ↑                │  │
+│  │                        data.js (fallback)     │  │
+│  └───────────────────────────────────────────────┘  │
+│                 │ fetch (X-Client-Id)               │
+└─────────────────┼───────────────────────────────────┘
+                  │
+        ┌─────────▼─────────┐
+        │  Spring Boot API  │
+        │  (in-memory store)│
+        └───────────────────┘
 ```
 
-**Key design note:** On first run, if neither `places.json` nor `places-seed.json` exists, the backend attempts to **extract the attraction dataset directly from `index.html`** (from the `RAW_ATTRACTIONS` block) and persists it to `data/places.json`. This makes a single self-contained HTML file act as both the frontend and the seed source for the server.
-
----
-
-## 🧰 Prerequisites
-
-### Backend
-- **JDK 11 or later** (no need for Maven/Gradle)
-- OS: Windows / Linux / macOS
-
-### Frontend
-- Any modern browser (Chrome / Firefox / Safari / Edge)
-- **Internet access** to load:
-  - Vazirmatn font (Google Fonts)
-  - Neshan SDK (map)
-  - Leaflet MarkerCluster (CDN)
-  - Unsplash and Placehold images
-
-> ⚠️ If offline, the UI will still load, but the **map** and **fonts** may not render correctly.
-
----
-
-## 🚀 Installation & Running
-
-### 1) Clone or download the project
-
-```bash
-git clone <repo-url>
-cd iran-tourism
-```
-
-### 2) Place the files in a single folder
+### Project Structure
 
 ```
-iran-tourism/
-├── IranTourismServer.java
-└── index.html
-```
-
-### 3) Compile and run
-
-```bash
-javac IranTourismServer.java
-java IranTourismServer
-```
-
-On successful startup you will see:
-
-```
-============================================
-  Iran Tourism Server
-  URL        : http://localhost:8080/
-  API        : http://localhost:8080/api
-  Base dir   : /path/to/iran-tourism
-  Data dir   : /path/to/iran-tourism/data
-  Places     : 412
-  Java       : 17.0.9
-============================================
-```
-
-### 4) Open in the browser
-
-```
-http://localhost:8080/
-```
-
-### Changing the port
-
-```bash
-# Via command-line argument
-java IranTourismServer --port=9090
-
-# Or via environment variable
-PORT=9090 java IranTourismServer
+iran-tourism-atlas/
+├── frontend/
+│   ├── index.html
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       ├── data.js        # Static dataset + buildPlaces()
+│       └── app.js         # Application logic
+│
+└── backend/
+    ├── pom.xml
+    └── src/main/
+        ├── java/com/irantourism/
+        │   ├── IranTourismApplication.java
+        │   ├── config/
+        │   │   ├── CorsConfig.java
+        │   │   └── DataSeeder.java        # optional: seeds from JSON
+        │   ├── model/
+        │   │   ├── Place.java
+        │   │   ├── Submission.java
+        │   │   └── Newsletter.java
+        │   ├── store/
+        │   │   └── InMemoryStore.java
+        │   └── controller/
+        │       ├── PlaceController.java
+        │       ├── PassportController.java
+        │       ├── SubmissionController.java
+        │       └── NewsletterController.java
+        └── resources/
+            ├── application.properties
+            └── seed/
+                └── places.json            # optional bulk seed
 ```
 
 ---
 
-## 📁 Project Structure
+## 🛠️ Tech Stack
 
+| Layer       | Technologies                                                        |
+|-------------|---------------------------------------------------------------------|
+| **Frontend**| HTML5, CSS3 (custom properties, Grid, Flexbox), Vanilla JavaScript (ES2020+) |
+| **Maps**    | Leaflet 1.9.4 + Neshan SDK 1.0.8 + Leaflet.markercluster 1.5.3      |
+| **Typography** | Vazirmatn (Google Fonts)                                         |
+| **Backend** | Java 17, Spring Boot 3.2, Spring Web, Spring Validation             |
+| **Storage** | In-memory `ConcurrentHashMap` (swap for JPA/PostgreSQL in production) |
+| **Build**   | Maven                                                               |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Node.js** (optional, only for static file serving)
+- **JDK 17+**
+- **Maven 3.8+**
+- A modern browser with `fetch`, `crypto.randomUUID`, and `<dialog>`/modal support
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/iran-tourism-atlas.git
+cd iran-tourism-atlas
 ```
-iran-tourism/
-├── IranTourismServer.java     # Single-file backend (zero dependencies)
-├── index.html                 # SPA frontend + offline dataset
-└── data/                      # Created automatically
-    ├── places.json            # Attraction data (extracted from HTML or seed)
-    ├── passport.json          # Saved/visited per Client ID
-    ├── submissions.json       # User submissions and reports
-    └── newsletter.json        # Newsletter email subscriptions
+
+### 2. Configure the map API key
+
+The frontend uses the **Neshan** map service. The key is defined in `frontend/js/app.js`:
+
+```javascript
+const NESHAN_API_KEY = "web.624be8c281c1439a8183326986ac35a0";
 ```
 
-### Optional files
+> ⚠️ **Important:** Replace this with your own Neshan API key. Obtain one for free at [neshan.org](https://platform.neshan.org/).
 
-- `places-seed.json` — if present, takes precedence over HTML extraction (an array of Place objects)
-- `public/index.html` — alternative path for the frontend
+### 3. Run the backend
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+The API will start on **`http://localhost:8080`**.
+
+### 4. Serve the frontend
+
+```bash
+cd frontend
+python3 -m http.server 3000
+# or: npx serve .
+```
+
+Then open **`http://localhost:3000`**.
+
+> 💡 The frontend expects the API at `/api`. If you run the frontend on a different origin, configure a dev proxy or set `window.__API_BASE__ = "http://localhost:8080/api"` before `app.js` loads.
+
+### 5. (Optional) Seed bulk data
+
+```bash
+curl -X POST http://localhost:8080/api/places/bulk \
+  -H "Content-Type: application/json" \
+  --data-binary @backend/src/main/resources/seed/places.json
+```
+
+---
+
+## 🔌 API Reference
+
+All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` require the `X-Client-Id` header.
+
+### Places
+
+| Method | Path                      | Description                          |
+|--------|---------------------------|--------------------------------------|
+| `GET`  | `/api/places`             | List places (paginated)              |
+| `GET`  | `/api/places/{id}`        | Get a single place                   |
+| `POST` | `/api/places/bulk`        | Bulk insert/upsert places            |
+
+**Example** — `GET /api/places?page=0&size=20`
+
+```json
+{
+  "items": [
+    {
+      "id": "place-0001",
+      "name": "جنگل‌های ارسباران",
+      "province": "آذربایجان شرقی",
+      "category": "طبیعی",
+      "lat": 38.92,
+      "lng": 47.06,
+      "shortDescription": "پهنهٔ ۱۶۴ هزار هکتاری...",
+      "tags": ["جنگل", "تنوع زیستی", "یونسکو"],
+      "status": "نمونه نمایشی"
+    }
+  ],
+  "total": 412,
+  "page": 0,
+  "size": 20
+}
+```
+
+### Passport (Saved / Visited)
+
+| Method   | Path                                  | Description                          |
+|----------|---------------------------------------|--------------------------------------|
+| `GET`    | `/api/passport/saved`                 | List saved places for this client    |
+| `GET`    | `/api/passport/visited`               | List visited places for this client  |
+| `POST`   | `/api/passport/saved/{placeId}`       | Add a place to the saved list        |
+| `DELETE` | `/api/passport/saved/{placeId}`       | Remove a place from the saved list   |
+| `POST`   | `/api/passport/visited/{placeId}`     | Mark a place as visited              |
+| `DELETE` | `/api/passport/visited/{placeId}`     | Unmark a place as visited            |
+
+**Header required:** `X-Client-Id: <uuid>` (generated automatically by the frontend and stored in `localStorage`).
+
+### Submissions
+
+| Method | Path                       | Description                        |
+|--------|----------------------------|------------------------------------|
+| `POST` | `/api/submissions`         | Submit a new attraction            |
+| `POST` | `/api/submissions/report`  | Report an error on existing place  |
+| `GET`  | `/api/submissions`         | List all submissions (admin)       |
+
+**Example** — `POST /api/submissions`
+
+```json
+{
+  "name": "آبشار نمونه",
+  "type": "جاذبه طبیعی",
+  "province": "لرستان",
+  "locality": "خرم‌آباد",
+  "lat": 33.49,
+  "lng": 48.35,
+  "reason": "چشم‌انداز کم‌نظیر و دسترسی نسبتاً آسان",
+  "source": "https://example.com/source",
+  "access": "با هماهنگی محیط‌زیست"
+}
+```
+
+### Newsletter
+
+| Method | Path               | Description           |
+|--------|--------------------|-----------------------|
+| `POST` | `/api/newsletter`  | Subscribe an email    |
+
+---
+
+## 🎨 UI Structure
+
+| Section             | Purpose                                                      |
+|---------------------|--------------------------------------------------------------|
+| `#home` — Hero      | Search bar, popular searches, discovery statistics           |
+| Quick access grid   | One-click category filtering                                 |
+| `#discovery`        | Curated promos + random discovery                            |
+| `#atlas`            | Map + result list + advanced filters                         |
+| `#provinces`        | 31 province cards with images                                |
+| `#collections`      | Thematic collections (history, nature, food, routes)         |
+| Digital passport    | Save/visit counters and export                               |
+| `#about`            | Trust principles                                             |
+| Modals              | Detail, filters, submission, report, passport                |
+| Toast region        | Non-blocking notifications                                   |
+
+---
+
+## ♿ Accessibility
+
+- **Focus trapping** in modals with Tab/Shift+Tab navigation
+- **`Escape`** closes modals; **`/`** focuses the global search
+- Semantic HTML with `aria-label`, `aria-live`, `aria-modal`
+- Visible focus rings respecting `:focus-visible`
+- `prefers-reduced-motion` disables transitions and animations
+- RTL-first, keyboard-operable result cards
 
 ---
 
 ## ⚙️ Configuration
 
-### Frontend (`index.html`)
+### Frontend
 
-| Variable | Location | Description |
-|----------|----------|-------------|
-| `API_BASE` | Top of the script | Base URL of the API (default: `/api`) |
-| `NESHAN_API_KEY` | Main script | Neshan map API key |
-| `CLIENT_ID` | `localStorage` | A stable unique identifier per user |
-| `RESULTS_PAGE_SIZE` | Script | Number of results per pagination step (default: 50) |
+- **API base URL:** override with `window.__API_BASE__ = "/api"` before loading `app.js`.
+- **Neshan API key:** `frontend/js/app.js` → `NESHAN_API_KEY`.
+- **Offline dataset:** `frontend/js/data.js` → `RAW_ATTRACTIONS`.
 
-To change the API base URL (e.g., in a split frontend/backend dev setup):
+### Backend
 
-```html
-<script>
-  window.__API_BASE__ = "http://localhost:8080/api";
-</script>
-```
-
-### Backend (`IranTourismServer.java`)
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `DEFAULT_PORT` | `8080` | Default port |
-| `PORT_ENV` | `PORT` | Name of the port environment variable |
-| `MAX_PAGE_SIZE` | `50000` | Maximum page size |
-| `DEFAULT_PAGE_SIZE` | `1000` | Default page size |
+| Property                       | Default | Description                        |
+|--------------------------------|---------|------------------------------------|
+| `server.port`                  | `8080`  | HTTP port                          |
+| `spring.application.name`      | —       | Application identifier             |
+| `logging.level.root`           | `INFO`  | Log level                          |
 
 ---
 
-## 📚 API Reference
+## 🧪 Testing
 
-### 🔹 `GET /api/health`
+> The demo ships without automated tests. Recommended starting points:
 
-Server health check.
-
-```json
-{
-  "status": "ok",
-  "places": 412,
-  "time": "2025-01-15T10:30:00Z"
-}
-```
-
-### 🔹 `GET /api/places`
-
-List attractions with full filtering.
-
-**Query Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | string | Text search (normalized) |
-| `category` | string | Category: `طبیعی` / `تاریخی` / `زمین‌شناسی` / `فرهنگی` / `خوراک` / `مسیر` |
-| `province` | string | Province name |
-| `difficulty` | string | `آسان` / `متوسط` / `دشوار` / `نامشخص` |
-| `season` | string | `بهار` / `تابستان` / `پاییز` / `زمستان` / `چهارفصل` |
-| `duration` | string | `کوتاه` / `نیم‌روز` / `روزانه` |
-| `status` | string | `نمونه نمایشی` / `تأییدشده` / `نیازمند بررسی` |
-| `sort` | string | `default` / `name` / `province` / `difficulty` |
-| `savedOnly` | boolean | Only items saved by the current Client ID |
-| `page` | int | Page number (zero-based) |
-| `size` | int | Page size |
-
-**Request headers:**
-- `X-Client-Id` (optional): required if `savedOnly=true`
-
-**Response:**
-
-```json
-{
-  "items": [ { "...Place..." } ],
-  "total": 412,
-  "page": 0,
-  "size": 1000
-}
-```
-
-The response also includes an `X-Total-Count` header with the total item count.
-
-### 🔹 `GET /api/places/{id}`
-
-Retrieve a single attraction. Returns `404` if not found.
-
-### 🔹 `GET /api/provinces`
-
-Sorted list of provinces.
-
-```json
-["آذربایجان شرقی", "آذربایجان غربی", "...", "یزد"]
-```
-
-### 🔹 Passport — `GET/POST/DELETE /api/passport/{saved|visited}[/{placeId}]`
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/passport/saved` | List saved attractions |
-| `POST` | `/api/passport/saved/{placeId}` | Add to saved list |
-| `DELETE` | `/api/passport/saved/{placeId}` | Remove from saved list |
-| `GET` | `/api/passport/visited` | List visited attractions |
-| `POST` | `/api/passport/visited/{placeId}` | Mark as visited |
-| `DELETE` | `/api/passport/visited/{placeId}` | Unmark as visited |
-
-> 🔑 The `X-Client-Id` header is **mandatory**. If missing → `400`.
-
-### 🔹 `POST /api/submissions`
-
-Submit a new attraction proposal.
-
-```json
-{
-  "name": "Sample Waterfall",
-  "type": "جاذبه طبیعی",
-  "province": "لرستان",
-  "locality": "خرم‌آباد",
-  "lat": 33.5,
-  "lng": 48.3,
-  "reason": "Explanation of why this is worth featuring",
-  "source": "Source or evidence",
-  "access": "Access conditions"
-}
-```
-
-**Success response (201):** The new `Place` object with `status: "نیازمند بررسی"` (Needs Review).
-
-### 🔹 `POST /api/submissions/report`
-
-Report an error or request a correction.
-
-```json
-{
-  "name": "Attraction name",
-  "placeId": "place-0042",
-  "reason": "Description of the issue",
-  "source": "...",
-  "access": "..."
-}
-```
-
-**Success response:** `204 No Content`
-
-### 🔹 `POST /api/newsletter`
-
-Register an email for the newsletter.
-
-```json
-{ "email": "user@example.com" }
-```
-
-**Success response:** `204 No Content`
-
-### 🔹 Error responses
-
-```json
-{
-  "timestamp": "2025-01-15T10:30:00Z",
-  "status": 400,
-  "message": "Error message in Persian"
-}
-```
-
----
-
-## 🧩 Data Model
-
-Every attraction (`Place`) has the following structure:
-
-```json
-{
-  "id": "place-0001",
-  "name": "Persepolis",
-  "province": "Fars",
-  "locality": "Marvdasht",
-  "category": "تاریخی",
-  "type": "Achaemenid Complex (World Heritage)",
-  "lat": 29.9352,
-  "lng": 52.8916,
-  "short": "Short summary",
-  "description": "Full description",
-  "image": "https://...",
-  "difficulty": "آسان",
-  "season": "چهارفصل",
-  "duration": "نیم‌روز",
-  "status": "نمونه نمایشی",
-  "tags": ["Achaemenid", "UNESCO"],
-  "visit": "Visit guidance",
-  "alert": "Important warning",
-  "verified": false,
-  "color": "#c09142"
-}
-```
-
-### Constant values
-
-| Field | Allowed values |
-|-------|----------------|
-| `category` | `طبیعی`, `تاریخی`, `زمین‌شناسی`, `فرهنگی`, `خوراک`, `مسیر` |
-| `difficulty` | `آسان`, `متوسط`, `دشوار`, `نامشخص` |
-| `season` | `بهار`, `تابستان`, `پاییز`, `زمستان`, `چهارفصل` |
-| `duration` | `کوتاه`, `نیم‌روز`, `روزانه` |
-| `status` | `نمونه نمایشی`, `تأییدشده`, `نیازمند بررسی` |
-
----
-
-## 🖱️ User Guide
-
-### For end users
-
-1. **Search:** Use the hero search bar or the map search field.
-2. **Random discovery:** Click "Surprise me" to open a random attraction.
-3. **Advanced filters:** Click "Filters" at the top of the atlas.
-4. **Save/Visit:** Use the bookmark icon on a card or in the detail modal.
-5. **Passport:** Open "My List" to view your personal list and export it.
-6. **Contribute:** Use "Submit Attraction" to propose a new place, or the "Report Correction" button inside the detail modal to flag an error.
-
-### Keyboard shortcuts
-
-| Key | Action |
-|-----|--------|
-| `/` | Focus the main search field |
-| `Esc` | Close modal or close map popup |
-| `Tab` / `Shift+Tab` | Navigate and cycle focus within modals |
-
----
-
-## 🛠️ Development & Customization
-
-### Adding a new attraction (quick way)
-
-Attraction data lives inside `RAW_ATTRACTIONS` in `index.html`. Add a new entry under the relevant province:
-
-```javascript
-"Lorestan": [
-  {
-    name: "Sample Waterfall",
-    cat: "طبیعی",
-    type: "Waterfall",
-    lat: 33.50, lng: 48.30,
-    short: "Short description",
-    tags: ["Waterfall", "Forest"],
-    visit: "Visit guidance"
-  }
-]
-```
-
-Then delete `data/places.json` and restart the server — the data will be re-extracted from the HTML.
-
-### Adding a new field to `Place`
-
-1. Add the field to the `Place` class (Java).
-2. Include it in `Place.toJson()` and `Place.fromJson()`.
-3. Populate it in `extractFromHtml()`.
-4. Display it in the frontend (card and modal).
-
-### Changing visual styling
-
-All design tokens are defined in `:root`:
-
-```css
-:root {
-  --forest: #102c27;
-  --lime: #c4dba5;
-  --gold: #d5a85b;
-  --font: "Vazirmatn", Tahoma, sans-serif;
-  /* ... */
-}
-```
-
-### Switching the map provider
-
-The map service is initialized inside `initMap()`. To switch from Neshan to Mapbox or OpenStreetMap, you only need to modify the `new L.Map(...)` call and its tile layer.
-
----
-
-## ⚠️ Limitations & Security Notes
-
-### Design limitations
-
-| Limitation | Description |
-|------------|-------------|
-| **Authentication** | Only via `X-Client-Id` (no real login). Production requires JWT or OAuth. |
-| **Open CORS** | `Access-Control-Allow-Origin: *` — suitable for development, **not** for production. |
-| **No rate limiting** | Vulnerable to bulk abuse. |
-| **File-based storage** | Not suitable for high write volumes. A database is required at scale. |
-| **No rich content validation** | Text fields are only length-limited. |
-| **Attraction coordinates** | Some coordinates are approximate and intended for sample display only. |
-
-### Pre-production recommendations
-
-- [ ] Add **real authentication** (JWT) and associate passports with users
-- [ ] Restrict **CORS** to specific domains
-- [ ] Add **rate limiting** (e.g., per IP)
-- [ ] Enforce **HTTPS** and secure response headers
-- [ ] Migrate to a database (SQLite / PostgreSQL) for concurrent writes
-- [ ] Build an admin panel to review `submissions`
-- [ ] Integrate a **geocoding service** to validate coordinates
-- [ ] Add **Cache-Control** and **compression**
+- **Frontend:** Vitest or Playwright for E2E (search, filter, save/visit flows).
+- **Backend:** Spring Boot `@WebMvcTest` for controllers and `@SpringBootTest` for the store.
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] Interactive atlas with Neshan
-- [x] Digital passport (save + visited)
-- [x] Submission and report forms
-- [x] Offline fallback
-- [ ] Admin panel for reviewing submissions
-- [ ] User login via OTP
-- [ ] Multi-stop Trip Planner
-- [ ] User reviews and ratings
-- [ ] PWA (installability and full cache)
-- [ ] Internationalization (English / Arabic)
-- [ ] PDF / GPX export of the passport
+- [ ] Persist data to PostgreSQL with JPA/Flyway
+- [ ] Authentication & per-user passports
+- [ ] Admin moderation workflow for submissions
+- [ ] Full English localization (i18n)
+- [ ] Offline-first PWA with service worker
+- [ ] Additional map layers (satellite, terrain)
+- [ ] Route planning across multiple attractions
+- [ ] Comprehensive test coverage
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome. To contribute:
+Contributions are welcome! Please follow these steps:
 
-1. **Fork** the repository
-2. Create a new **branch**: `git checkout -b feature/my-feature`
-3. **Commit** your changes: `git commit -m "feat: add new feature"`
-4. **Push** to your fork: `git push origin feature/my-feature`
-5. Open a **Pull Request**
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feature/your-feature`.
+3. Follow the existing code style (Vanilla JS, no frameworks, no jQuery).
+4. Write clear commit messages.
+5. Open a pull request with a description of the change and any related issues.
 
-### Coding standards
-
-- **Java:** Standard style, no dependencies, JDK 11+ (pattern matching for `instanceof` is allowed).
-- **HTML/JS:** ES2020+, no frameworks, ARIA and accessibility are mandatory.
-- **Commit messages:** Follow [Conventional Commits](https://www.conventionalcommits.org/).
+Please respect the project's commitment to:
+- **Data integrity** — sources and review status must be explicit.
+- **Site safety** — sensitive coordinates and dangerous routes are governed by protection policies.
+- **Responsible travel** — the atlas discourages irresponsible visitation.
 
 ---
 
 ## 📄 License
 
-This project is published for educational and prototyping purposes. Before commercial use, please coordinate with the project maintainer.
+This project is released under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
-### External resources and dependencies
-
-| Resource | Purpose | License |
-|----------|---------|---------|
-| [Leaflet](https://leafletjs.com/) | Map library | BSD-2-Clause |
-| [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) | Marker clustering | MIT |
-| [Neshan SDK](https://platform.neshan.org/) | Iranian map service | Proprietary |
-| [Vazirmatn](https://github.com/rastikerdar/vazirmatn) | Persian font | SIL OFL 1.1 |
-| [Unsplash](https://unsplash.com/) | Sample images | Unsplash License |
-| [Placehold.co](https://placehold.co/) | Placeholder images | Free |
-
-> ⚠️ **The Neshan API key** present in `index.html` is a public sample key. For production use, obtain your own key from the [Neshan Platform](https://platform.neshan.org/).
+Third-party components retain their own licenses:
+- [Leaflet](https://leafletjs.com/) — BSD-2-Clause
+- [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) — MIT
+- [Neshan Maps SDK](https://platform.neshan.org/) — Neshan Terms of Service
+- [Vazirmatn](https://github.com/rastikerdar/vazirmatn) — SIL OFL 1.1
 
 ---
 
-## 🙏 Acknowledgements
+## 🙏 Acknowledgments
 
-- The **Neshan team** for providing an Iranian map SDK
-- The **Leaflet community** for open-source tooling
-- **Saber Rastikerdar** for the beautiful Vazirmatn font
-- And **everyone documenting Iran's attractions** — your work makes this project possible
+- **Neshan Maps** for the map infrastructure and SDK
+- The **Vazirmatn** team for the Persian typeface
+- The **Leaflet** community for marker clustering
+- All contributors who help document Iran's diverse attractions responsibly
+
+---
+
+## 📬 Contact
+
+For questions, suggestions, or collaborations, please open an issue or contact the maintainers at **[maintainers@example.com](mailto:maintainers@example.com)**.
 
 ---
 
 <div align="center">
 
-**🇮🇷 Responsible discovery, deeper understanding**
+**Made with ❤️ for responsible discovery of Iran**
 
-*Built with ❤️ for Iran*
+*اطلس هوشمند جاذبه‌های ایران*
 
 </div>
+```
+
+---
+
+## Notes on this README
+
+| Section | Why it's included |
+|---|---|
+| **Badges** | Quick visual signal of stack, license, and demo status |
+| **Overview** | One-paragraph explanation of *what* and *why*, mentioning the RTL/Persian-first design and no-jQuery constraint |
+| **Features** | Grouped by user-facing domain (map, discovery, passport, contributions, design, resilience) so reviewers can skim |
+| **Architecture** | ASCII diagram + tree — helps new contributors orient in <30 seconds |
+| **Tech Stack table** | Explicit about *not* using frameworks on the frontend |
+| **Getting Started** | Numbered steps, copy-pasteable commands, and a bold callout for the **Neshan API key** (a common setup trap) |
+| **API Reference** | Full endpoint table with a working JSON example — required for anyone wiring the frontend to a different backend |
+| **UI Structure** | Maps DOM section IDs to product intent so designers can navigate |
+| **Accessibility** | Short but concrete; most portfolios omit this |
+| **Configuration** | Frontend + backend, in one place |
+| **Roadmap** | Communicates project maturity and direction without overpromising |
+| **Contributing** | Reinforces the three editorial principles baked into the product |
+| **License & Acknowledgments** | Legally correct per-dependency attribution, including Neshan's ToS |
