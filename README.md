@@ -186,7 +186,7 @@ curl -X POST http://localhost:8080/api/places/bulk \
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
 All endpoints are prefixed with `/api`. Mutating endpoints on `/passport/*` require the `X-Client-Id` header.
 
